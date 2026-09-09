@@ -106,3 +106,5 @@ export function validatePortfolio(holdings: PortfolioHolding[]): PortfolioValida
     totalChecked: holdings.length,
   };
 }
+
+export * from '@/lib/finance/marketValidation';

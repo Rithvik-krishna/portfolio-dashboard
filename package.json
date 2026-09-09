@@ -10,12 +10,17 @@
     "test:phase2": "tsx scripts/verify-phase2.ts",
     "test:phase3": "tsx scripts/verify-phase3.ts",
     "test:phase4": "tsx scripts/verify-phase4.ts",
-    "test:phase5": "tsx scripts/verify-phase5.ts"
+    "test:phase5": "tsx scripts/verify-phase5.ts",
+    "test:phase6": "tsx scripts/verify-phase6.ts",
+    "test:phase7": "tsx scripts/verify-phase7.ts",
+    "test:validation": "tsx scripts/verify-market-validation.ts"
   },
   "dependencies": {
+    "lucide-react": "^1.43.0",
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

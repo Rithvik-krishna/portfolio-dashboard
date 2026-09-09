@@ -2,6 +2,7 @@ import { MarketQuote, MarketProviderError } from '@/types/market';
 import { IMarketQuoteProvider, ProviderRequestOptions } from './types';
 import { toYahooSymbol } from '@/lib/portfolio/normalization';
 import { financeLogger } from './logger';
+import { validateMarketPrice } from './marketValidation';
 
 /**
  * Yahoo Finance Quote Provider.
@@ -114,23 +115,24 @@ export class YahooQuoteProvider implements IMarketQuoteProvider {
         });
       }
 
-      // regularMarketPrice is the primary current market price
-      const cmp =
-        typeof meta.regularMarketPrice === 'number' &&
-        !isNaN(meta.regularMarketPrice) &&
-        isFinite(meta.regularMarketPrice) &&
-        meta.regularMarketPrice >= 0
-          ? meta.regularMarketPrice
-          : null;
+      // Validate candidate regularMarketPrice against equity sanity bounds and 52-week trading range
+      const rawCmp = meta.regularMarketPrice;
+      const validation = validateMarketPrice(rawCmp, {
+        fiftyTwoWeekHigh: typeof meta.fiftyTwoWeekHigh === 'number' && isFinite(meta.fiftyTwoWeekHigh) ? meta.fiftyTwoWeekHigh : null,
+        fiftyTwoWeekLow: typeof meta.fiftyTwoWeekLow === 'number' && isFinite(meta.fiftyTwoWeekLow) ? meta.fiftyTwoWeekLow : null,
+      });
 
-      if (cmp === null) {
+      if (!validation.isValid || validation.sanitizedCmp === null) {
+        financeLogger.warn('Yahoo', `Rejected implausible market price for ${yahooSymbol}: ${rawCmp} (${validation.reason})`);
         return this.createErrorQuote(symbol, exchangeCode, yahooSymbol, timestamp, {
           code: 'DATA_UNAVAILABLE',
-          message: `Market price is not currently available for ${yahooSymbol}`,
+          message: `Market price failed sanity validation for ${yahooSymbol}: ${validation.reason}`,
           provider: 'YAHOO',
           timestamp,
         });
       }
+
+      const cmp = validation.sanitizedCmp;
 
       financeLogger.info('Yahoo', `Successfully retrieved CMP for ${yahooSymbol}: ₹${cmp}`);
 

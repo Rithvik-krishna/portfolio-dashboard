@@ -34,6 +34,8 @@ export interface PortfolioHolding {
   latestEarnings?: string | number | null;
 }
 
+export type CalculatedHolding = PortfolioHolding;
+
 /**
  * Raw holding extracted directly from source before full normalization
  */

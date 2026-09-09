@@ -5,6 +5,7 @@ import { GoogleValuationProvider, toGoogleSymbol } from './google';
 import { toYahooSymbol } from '@/lib/portfolio/normalization';
 import { MemoryCache, RequestDeduplicator, CACHE_CONFIG, marketCache, requestDeduplicator } from '@/lib/cache';
 import { financeLogger } from './logger';
+import { validateMarketPrice } from './marketValidation';
 
 export interface BatchMarketDataResult {
   data: StockMarketData[];
@@ -56,8 +57,14 @@ export class MarketDataService {
     // 1. Check active fresh cache
     const cached = this.cache.get<StockMarketData>(stockCacheKey);
     if (cached) {
-      financeLogger.info('MarketData', `Cache HIT for ${stockCacheKey}`);
-      return cached;
+      const validation = validateMarketPrice(cached.cmp);
+      if (!validation.isValid) {
+        financeLogger.warn('MarketData', `Evicting invalid cached CMP for ${stockCacheKey}: ${cached.cmp}`);
+        this.cache.delete(stockCacheKey);
+      } else {
+        financeLogger.info('MarketData', `Cache HIT for ${stockCacheKey}`);
+        return cached;
+      }
     }
 
     // 2. In-Flight Request Deduplication
@@ -106,18 +113,29 @@ export class MarketDataService {
 
     if (quoteResult.status === 'fulfilled') {
       const quote = quoteResult.value;
-      if (quote.cmp !== null) {
-        cmp = quote.cmp;
+      const validation = validateMarketPrice(quote.cmp);
+      if (validation.isValid && validation.sanitizedCmp !== null) {
+        cmp = validation.sanitizedCmp;
         quoteSource = quote.source;
         // Cache successful quote
         this.cache.set(quoteCacheKey, quote, CACHE_CONFIG.MARKET_DATA_CACHE_TTL_MS);
       } else {
+        if (quote.cmp !== null) {
+          financeLogger.warn('MarketData', `Rejected invalid quote CMP for ${exchangeCode}: ${quote.cmp} (${validation.reason})`);
+          errors.push({
+            code: 'DATA_UNAVAILABLE',
+            message: `Market price failed validation: ${validation.reason}`,
+            provider: 'YAHOO',
+            timestamp: retrievalTime,
+          });
+        }
         // Quote returned an error / null
         if (quote.error) errors.push(quote.error);
         // Stale-on-Error Fallback: check if we have a last known good quote
         const staleQuote = this.cache.getStale<{ cmp: number }>(quoteCacheKey);
-        if (staleQuote && staleQuote.value.cmp !== null) {
-          cmp = staleQuote.value.cmp;
+        const staleValidation = validateMarketPrice(staleQuote?.value?.cmp);
+        if (staleValidation.isValid && staleValidation.sanitizedCmp !== null) {
+          cmp = staleValidation.sanitizedCmp;
           quoteSource = 'YAHOO_STALE';
           isStale = true;
           financeLogger.warn('MarketData', `Using stale-on-error fallback quote for ${yahooSymbol}: ₹${cmp}`);

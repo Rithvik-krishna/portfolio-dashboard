@@ -360,7 +360,7 @@ async function runTests() {
     typeof mockApiResponse.requestTimestamp === 'string' &&
     typeof mockApiResponse.data === 'object' &&
     Array.isArray(mockApiResponse.errors) &&
-    typeof mockApiResponse.coverage === 'object',
+    typeof mockApiResponse.coverage === 'number',
     '14. MarketDataApiResponse conforms to strict TypeScript contract'
   );
 

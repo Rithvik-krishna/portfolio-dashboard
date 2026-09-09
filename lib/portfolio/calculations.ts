@@ -1,4 +1,5 @@
 import { PortfolioHolding, PortfolioSummary, PortfolioDataState } from '@/types/portfolio';
+import { validateMarketPrice } from '@/lib/finance/marketValidation';
 
 /**
  * Calculates initial investment amount.
@@ -171,10 +172,9 @@ export function deriveHoldingMetrics(
       ? holding.quantity
       : 0;
 
-  const safeCmp =
-    holding.cmp !== null && holding.cmp !== undefined && (isNaN(holding.cmp) || !isFinite(holding.cmp))
-      ? null
-      : holding.cmp;
+  const safeCmp = validateMarketPrice(holding.cmp, {
+    purchasePrice: safePurchasePrice,
+  }).sanitizedCmp;
 
   const investment = calculateInvestment(safePurchasePrice, safeQuantity);
   const presentValue = calculatePresentValue(safeCmp, safeQuantity);

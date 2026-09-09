@@ -28,15 +28,37 @@ export async function GET(request: NextRequest): Promise<NextResponse<MarketData
       exchangeCode: h.exchangeCode,
     }));
 
-    if (symbolsFilter) {
-      const requestedList = symbolsFilter.split(',').map((s) => s.trim().toUpperCase());
-      targetHoldings = targetHoldings.filter((h) =>
-        requestedList.includes(h.exchangeCode.toUpperCase()) ||
-        requestedList.includes(h.name.toUpperCase())
-      );
+    if (symbolsFilter !== null) {
+      const rawTokens = symbolsFilter
+        .split(',')
+        .map((s) => s.trim().toUpperCase())
+        .filter((s) => s.length > 0);
+
+      // Deduplicate and cap maximum symbol count to protect against uncontrolled queries
+      const requestedList = Array.from(new Set(rawTokens)).slice(0, 50);
+
+      if (requestedList.length > 0) {
+        targetHoldings = targetHoldings.filter((h) =>
+          requestedList.includes(h.exchangeCode.toUpperCase()) ||
+          requestedList.includes(h.name.toUpperCase())
+        );
+      } else {
+        // Empty symbol list requested explicitly -> return empty result safely
+        targetHoldings = [];
+      }
     }
 
     financeLogger.info('API:MarketData', `Processing request for ${targetHoldings.length} holdings`);
+
+    if (targetHoldings.length === 0) {
+      return NextResponse.json({
+        success: true,
+        requestTimestamp,
+        data: [],
+        errors: [],
+        coverage: 0,
+      });
+    }
 
     const result = await marketDataService.getPortfolioMarketData(targetHoldings);
 
