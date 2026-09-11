@@ -6,19 +6,20 @@ Engineered with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tai
 
 ---
 
-## 🎥 Video Walkthrough (Loom)
+## 🎥 Video Walkthrough & Technical Documentation
 
-[![Watch Technical Walkthrough](https://img.shields.io/badge/Loom-Watch%20Technical%20Walkthrough-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d)
+| Resource | Link | Description |
+| :--- | :--- | :--- |
+| 🎥 **Loom Video Walkthrough** | [**Watch Video**](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d) | 5–7 min architecture deep-dive & live demo |
+| 📄 **Challenges Faced Document** | [**View Document**](https://drive.google.com/file/d/1ZICFI_42C9Ham7kpbKqK8-7WgnlG3G_F/view?usp=sharing) | Comprehensive engineering challenges & solutions report |
 
+### 🎥 Loom Video Walkthrough
+[![Watch Technical Walkthrough](https://img.shields.io/badge/Loom-Watch%20Technical%20Walkthrough-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d)  
 ▶️ **Direct Link**: [https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d)
 
-A complete 5–7 minute technical deep-dive demonstrating:
-- Live dashboard walkthrough, interactive Recharts visualizations, and 11-column sector-grouped holdings table
-- Deterministic calculation engine & pure mathematical modeling
-- Yahoo Finance CMP & Google Finance P/E / EPS scraping architecture
-- Real-world anomaly protection (defending against Yahoo's ₹10.6B BSE price glitch)
-- 60s in-memory caching, request deduplication, and stale-on-error fallback
-- Automated testing suite with 200+ passing assertions
+### 📄 Technical Assignment — Challenges Faced
+[![Google Drive Document](https://img.shields.io/badge/Google%20Drive-Challenges%20Faced%20Document-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1ZICFI_42C9Ham7kpbKqK8-7WgnlG3G_F/view?usp=sharing)  
+▶️ **Direct Link**: [https://drive.google.com/file/d/1ZICFI_42C9Ham7kpbKqK8-7WgnlG3G_F/view?usp=sharing](https://drive.google.com/file/d/1ZICFI_42C9Ham7kpbKqK8-7WgnlG3G_F/view?usp=sharing)
 
 ---
 
