@@ -289,23 +289,3 @@ npm run test:phase7
 ```
 
 **Total Automated Assertions**: Over **190+ automated tests passed**.
-
----
-
-## Deployment to Vercel
-
-The application is fully compatible with standard zero-configuration deployment on **Vercel**:
-1. Push repository to GitHub.
-2. Import project into Vercel dashboard.
-3. Framework Preset: **Next.js**.
-4. Build Command: `next build`.
-5. No required environment variables or external infrastructure needed.
-
----
-
-## Key Documentation Files
-
-- [`TECHNICAL_CHALLENGES.md`](./TECHNICAL_CHALLENGES.md): Comprehensive 12-point engineering analysis of trade-offs, architecture decisions, and solutions.
-- [`SUBMISSION_CHALLENGES.md`](./SUBMISSION_CHALLENGES.md): Concise version tailored for HR PDF/Word assignment submission.
-- [`LOOM_SCRIPT.md`](./LOOM_SCRIPT.md): Complete technical script for recording a 5–8 minute architecture walkthrough video.
-- [`SCREENSHOT_CHECKLIST.md`](./SCREENSHOT_CHECKLIST.md): Guide to capturing all 9 required verification screenshots.
