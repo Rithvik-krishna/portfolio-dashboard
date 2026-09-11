@@ -143,10 +143,6 @@ dynamic-portfolio-dashboard/
 ├── types/
 │   ├── market.ts                  # Market domain contracts & error unions
 │   └── portfolio.ts               # Holding, Summary, and Sector contracts
-├── TECHNICAL_CHALLENGES.md        # Deep architectural dive into 12 engineering challenges
-├── SUBMISSION_CHALLENGES.md       # Concise PDF/Word export version for HR
-├── LOOM_SCRIPT.md                 # 5-8 minute technical walkthrough script
-├── SCREENSHOT_CHECKLIST.md        # Visual verification guide for submission
 └── package.json                   # Scripts, dependencies, and metadata
 ```
 
