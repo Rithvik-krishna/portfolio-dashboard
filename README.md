@@ -6,6 +6,22 @@ Engineered with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tai
 
 ---
 
+## 🎥 Video Walkthrough (Loom)
+
+[![Watch Technical Walkthrough](https://img.shields.io/badge/Loom-Watch%20Technical%20Walkthrough-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d)
+
+▶️ **Direct Link**: [https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d](https://www.loom.com/share/8b92ec47dd8845af81ca44ec2ca4545d)
+
+A complete 5–7 minute technical deep-dive demonstrating:
+- Live dashboard walkthrough, interactive Recharts visualizations, and 11-column sector-grouped holdings table
+- Deterministic calculation engine & pure mathematical modeling
+- Yahoo Finance CMP & Google Finance P/E / EPS scraping architecture
+- Real-world anomaly protection (defending against Yahoo's ₹10.6B BSE price glitch)
+- 60s in-memory caching, request deduplication, and stale-on-error fallback
+- Automated testing suite with 200+ passing assertions
+
+---
+
 ## 8byte Technical Assignment Coverage
 
 | Requirement | Implementation Details | Status |

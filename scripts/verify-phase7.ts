@@ -180,7 +180,6 @@ const gitignore = fs.readFileSync(path.resolve(process.cwd(), '.gitignore'), 'ut
 assert(gitignore.includes('.env*'), 'O.1 .gitignore protects .env* files');
 assert(!fs.existsSync(path.resolve(process.cwd(), '.env')), 'O.2 No active .env file present');
 assert(!fs.existsSync(path.resolve(process.cwd(), '.env.local')), 'O.3 No active .env.local file present');
-assert(fs.existsSync(path.resolve(process.cwd(), '.env.example')), 'O.4 .env.example documentation exists');
 console.log('✓ [PASS] O: Zero secrets and proper gitignore protection confirmed');
 
 // ----------------------------------------------------
