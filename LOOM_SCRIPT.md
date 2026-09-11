@@ -1,93 +1,101 @@
-# Loom Video Technical Walkthrough Script (5–8 Minutes)
+# Loom Video Technical Walkthrough Script (5–7 Minutes)
 
 **Project**: Dynamic Portfolio Dashboard  
 **Candidate**: Rithvik Krishna  
 **Audience**: 8byte Engineering Reviewers  
+**Live URL**: [Vercel Deployment URL]  
+**Repository**: [GitHub Repository URL]
 
 ---
 
-### [0:00 – 0:30] Project Overview
-> *"Hello! My name is Rithvik Krishna, and this is my technical walkthrough for the Dynamic Portfolio Dashboard assignment. The goal of this project was to take a real Excel portfolio of 26 Indian equities across 6 sectors, ingest and normalize the data with mathematical precision, fetch real-time market quotes from Yahoo Finance and Google Finance, and deliver a high-density, institutional-grade financial monitoring terminal built with Next.js App Router, React, TypeScript, Tailwind CSS, and Recharts."*
-
-**Visual**: Show the live dashboard running on `http://localhost:3000`. Point out the header, 4 KPI cards, 2 Recharts charts, and the 11-column holdings table.
-
----
-
-### [0:30 – 1:15] Excel Ingestion & Normalized Data
-> *"Let's start with data ingestion. In `lib/portfolio/normalization.ts`, we parse the source Excel sheet. Rather than inventing mock stocks or hardcoding numbers, we extract the exact 26 active holdings. Notice that Row 35 of the Excel sheet totals ₹15,43,060. Our normalization pipeline strips non-standard headers, whitespace, and subtotal rows to arrive at this exact ₹15,43,060 baseline benchmark. In `data/portfolio.json`, all market fields like CMP, P/E, and EPS are strictly initialized as `null`—we never fabricate live market data."*
-
-**Visual**: Open `data/portfolio.json` in VS Code and briefly show the clean holding schema with `cmp: null`.
-
----
-
-### [1:15 – 2:00] Deterministic Calculation Engine
-> *"Moving to the business logic: in `lib/portfolio/calculations.ts` and `grouping.ts`, we implement an immutable calculation engine. All financial math—Investment, Present Value, Unrealized Gain/Loss, Portfolio Weight, and Sector Aggregations—lives here as pure, deterministic functions. React components never perform financial calculations. Most importantly, we implemented strict null propagation. If CMP is missing, Present Value is `null`, and Gain/Loss is `null`. A naive calculation defaulting to zero would evaluate $0 - \text{Investment}$, falsely showing a 100% loss. Here, it cleanly displays as `N/A`."*
-
-**Visual**: Show `lib/portfolio/calculations.ts` highlighting `calculatePresentValue` and `calculatePortfolioSummary`.
-
----
-
-### [2:00 – 3:00] Market Data Providers (Yahoo & Google Finance)
-> *"For market data, we built a decoupled provider architecture under `lib/finance/`. We have two providers:
-> 1. `YahooQuoteProvider`: Retrieves live CMP. It automatically resolves NSE tickers by appending `.NS` and BSE scrip codes with `.BO`.
-> 2. `GoogleValuationProvider`: Google Finance does not offer a public REST API, so we built a lightweight server-side scraper using standard HTTP `fetch` and regex pattern matching for P/E ratio and quarterly EPS. No heavy headless browsers like Puppeteer were used, keeping server execution fast and memory usage minimal.
+### [0:00 – 0:45] 1. Project Overview & Live Deployment
+> *"Hello! My name is Rithvik Krishna, and this is my technical walkthrough for the Dynamic Portfolio Dashboard assignment. The goal of this project is to take a real Excel portfolio of 26 Indian equities across 6 sectors, ingest and normalize the data with mathematical precision, fetch real-time market quotes from Yahoo Finance and Google Finance, and deliver a high-density, institutional-grade financial monitoring terminal.
 > 
-> In `lib/finance/marketData.ts`, both providers are queried concurrently using `Promise.allSettled()`. This guarantees that if Google Finance has an issue, Yahoo's live price still updates the user's present value seamlessly."*
+> The application is built using Next.js 16 App Router, React 19, TypeScript, Tailwind CSS, and Recharts, and is deployed live on Vercel with serverless API route handlers."*
 
-**Visual**: Show `lib/finance/yahoo.ts` and `lib/finance/google.ts` with `AbortController` 5000ms timeouts.
-
----
-
-### [3:00 – 4:00] Caching, Deduplication & Rate Limiting
-> *"To protect against external rate limits and ensure sub-second response times, we built `lib/cache.ts`:
-> - First, a 60-second in-memory cache for successful quotes.
-> - Second, a 10-second negative cache for transient provider errors to prevent hammer loops.
-> - Third, an in-flight Request Deduplicator: if 5 users or rapid refreshes query the same stock simultaneously, they share the single pending network Promise.
-> - Fourth, a Stale-on-Error fallback: if an external provider goes down after cache expiration, we preserve the last known good quote and flag it as `isStale: true`.
-> In our live terminal tests, a cold fetch takes ~900ms, while a cache hit takes just 14ms—a 98.5% latency reduction."*
-
-**Visual**: Show the terminal benchmark output where Call 1 took ~900ms and Call 2 took 14ms.
+**On-Screen Action**: 
+- Show the live dashboard running on Vercel (or `http://localhost:3000`).
+- Point out the top status header with the live market indicator, 4 summary KPI cards, 2 Recharts charts, and the 11-column sector-grouped portfolio table.
 
 ---
 
-### [4:00 – 5:00] Frontend Dashboard & Visualizations
-> *"Now let's examine the user interface. In `app/page.tsx`, we built a responsive, dark-theme financial terminal:
-> - The Header displays a real-time status badge (`● LIVE`, `↻ UPDATING`, or `⚠ STALE DATA`) along with relative update times and data coverage.
-> - 4 Summary KPI Cards: Total Investment (₹15,43,060), Current Value, Total Gain/Loss, and Overall Return with semantic colors.
-> - Two Recharts charts: A Sector Allocation Donut Chart showing capital distribution, and a Sector Performance Bar Chart comparing Investment vs Current Value.
-> - The Holdings Table includes all 11 columns required by the assignment, grouped by the 6 sectors. Each sector accordion is collapsible, and its open/closed state is preserved during background refreshes."*
-
-**Visual**: Demonstrate the live browser UI: expand and collapse a sector, hover over the Recharts tooltips, and click the manual refresh button.
-
----
-
-### [5:00 – 6:00] Real-Time 15s Refresh & Error Handling
-> *"Under the hood, `hooks/useMarketData.ts` handles client-side real-time polling every 15 seconds. It connects to `/api/market-data`, merges live prices into the immutable calculation engine, and updates state without any full page reload. If a background refresh encounters a network glitch, the dashboard never blanks out; it gracefully preserves the existing market data and displays an unobtrusive status notice."*
-
-**Visual**: Show `hooks/useMarketData.ts` with the 15-second interval and in-flight guard ref.
-
----
-
-### [6:00 – 7:00] Testing & Verification Suite
-> *"Reliability is guaranteed through automated tests. We created dedicated test suites for every phase:
-> - `npm run test:phase2`: Excel ingestion (14 tests)
-> - `npm run test:phase3`: Calculation engine math and edge cases (83 tests)
-> - `npm run test:phase4`: Market data providers and partial failure matrix (20 tests)
-> - `npm run test:phase5`: Google scraping, deduplication, and cache TTLs (27 tests)
-> - `npm run test:phase6`: UI contracts, formatters, and production cleanliness (30+ tests)
-> - `npm run test:phase7`: Final QA, security audit, and route verification (17 checks)
-> In total, over 190 automated assertions pass. ESLint is clean with zero errors and zero warnings, and `npm run build` succeeds cleanly."*
-
-**Visual**: Run `npm run test:phase7` in the terminal to show all checks passing.
-
----
-
-### [7:00 – 8:00] Technical Challenges & Trade-offs
-> *"To conclude, I'd like to highlight three key engineering trade-offs:
-> 1. Lightweight scraping vs. Headless browsers: We chose HTTP `fetch` with regex over Puppeteer. The trade-off is susceptibility to DOM changes, but the payoff is a 10x faster response time and instant serverless cold starts.
-> 2. In-memory caching vs. Redis: We kept the cache process-local to avoid introducing unneeded infrastructure, accepting instance isolation in serverless deployments.
-> 3. Strict financial truth: We never invent or approximate missing CMP or EPS values. If data is unlisted, it displays as `N/A`.
+### [0:45 – 1:30] 2. Excel Ingestion & Normalized Data Model
+> *"Let's start with data ingestion. In `lib/portfolio/normalization.ts`, we parse the source Excel sheet. Rather than inventing mock stocks or hardcoding numbers, we extract the exact 26 active holdings. 
 > 
-> The codebase is fully documented in `README.md`, `TECHNICAL_CHALLENGES.md`, and ready for deployment. Thank you for your time!"*
+> In the source sheet, Row 35 totals ₹15,43,060. Our ingestion pipeline cleans headers, trims trailing whitespace, resolves exchange codes, and validates against that exact ₹15,43,060 baseline benchmark. In `data/portfolio.json`, all volatile market fields—like CMP, P/E, and EPS—are strictly initialized as `null`. We never fabricate live market data into static assets."*
 
-**Visual**: Show the clean GitHub repository and conclude the recording.
+**On-Screen Action**: 
+- Open `data/portfolio.json` in VS Code to briefly show the clean holding schema with `cmp: null`.
+- Briefly show `scripts/verify-phase2.ts` passing 14/14 benchmark checks.
+
+---
+
+### [1:30 – 2:30] 3. Deterministic Calculation Engine
+> *"For business logic, we established a strict architectural rule: React components never perform financial calculations. 
+> 
+> All math lives in pure, deterministic functions in `lib/portfolio/calculations.ts` and `grouping.ts`. We calculate Total Investment, Present Value, Unrealized Gain/Loss, Portfolio Weight, and Sector Aggregations.
+> 
+> A critical feature here is strict null propagation. If CMP is missing or pending, Present Value is `null`, and Gain/Loss is `null`. A naive calculation that defaults missing CMP to zero would calculate (0 - Investment), falsely telling the investor they lost 100% of their capital. In our terminal, it cleanly renders as `N/A`."*
+
+**On-Screen Action**: 
+- Open `lib/portfolio/calculations.ts` highlighting `calculatePresentValue`, `deriveHoldingMetrics`, and `calculatePortfolioSummary`.
+
+---
+
+### [2:30 – 3:30] 4. Market Data Architecture & The Real-World Yahoo Glitch Fix
+> *"For live data, we built a decoupled provider architecture under `lib/finance/`:
+> 1. `YahooQuoteProvider`: Fetches CMP using Yahoo's v8 chart endpoint, resolving NSE tickers with `.NS` and BSE scrip codes with `.BO`.
+> 2. `GoogleValuationProvider`: Google Finance has no public REST API, so we built a resilient server-side scraper using standard HTTP `fetch` and regex pattern matching to extract P/E ratio and latest earnings without heavy headless browser overhead.
+> 
+> During live testing, we caught a critical real-world bug: Yahoo Finance's API returned a corrupted market price of ₹10,60,33,28,500 (~₹10.6 Billion) for Fine Organic (`541557.BO`), which distorted our ₹15 Lakh portfolio into a ₹1.69 Lakh Crore position!
+> 
+> Instead of patching the JSON file, we built an institutional defensive layer in `lib/finance/marketValidation.ts`. It validates equity CMP against non-finite values, positive numbers, an absolute ₹10 Lakh cap, and a 50x purchase price deviation limit. Corrupted prices are safely rejected, protecting the entire portfolio from financial distortion."*
+
+**On-Screen Action**: 
+- Open `lib/finance/marketValidation.ts` to show `validateMarketPrice`.
+- Show how Fine Organic displays cleanly with CMP as `N/A`, P/E preserved, and portfolio total unaffected.
+
+---
+
+### [3:30 – 4:30] 5. Caching, Concurrency & Rate Limiting
+> *"To ensure sub-second response times and prevent IP bans from external financial endpoints, we built `lib/finance/cache.ts` and `marketData.ts`:
+> - First, a 60-second positive in-memory cache for live quotes.
+> - Second, a 10-second negative cache for missing or unlisted scrips to prevent tight retry loops.
+> - Third, an in-flight Request Deduplicator: if multiple polling cycles or users request the same stock simultaneously, they share a single network Promise.
+> - Fourth, Stale-on-Error Fallback: if an upstream provider fails, we preserve the last known good quote marked as `isStale: true`.
+> - Fifth, controlled batch concurrency: tickers are processed in chunks of 5 rather than firing 26 parallel requests."*
+
+**On-Screen Action**: 
+- Show `lib/finance/cache.ts` and the controlled batch concurrency loop in `lib/finance/marketData.ts`.
+
+---
+
+### [4:30 – 5:30] 6. Frontend Terminal UI & Dynamic 15s Polling
+> *"Looking at the UI in `app/page.tsx`:
+> - The Header provides an active live pulse badge (`● LIVE`), last sync timestamp, and stock coverage counter.
+> - 4 Summary KPI Cards highlight Total Investment, Current Value, and Total Return with clear color cues.
+> - Two interactive Recharts widgets display Sector Asset Allocation via a Donut chart and Sector Performance via a Bar chart.
+> - The 11-column Portfolio Table groups stocks by sector with collapsible accordions that preserve their open/closed state across background refreshes.
+> - In `hooks/useMarketData.ts`, a 15-second `setInterval` polls `/api/market-data` in the background with in-flight deduplication, recalculating portfolio metrics via React's `useMemo` with zero UI flicker or layout shifts."*
+
+**On-Screen Action**: 
+- Interact with the UI: collapse and expand sectors, hover over Recharts tooltips, and click the manual "Refresh" button to demonstrate the live refresh spinner.
+
+---
+
+### [5:30 – 6:15] 7. Automated Verification Suite & Conclusion
+> *"Quality and reproducibility are backed by over 200 automated assertions:
+> - `npm run test:phase2`: Excel benchmark verification (14 tests)
+> - `npm run test:phase3`: Pure calculation engine math & rounding (83 tests)
+> - `npm run test:phase4`: Provider architecture & partial failure isolation (20 tests)
+> - `npm run test:phase5`: Google Finance scraping & caching behavior (27 tests)
+> - `npm run test:phase6`: Dashboard formatting & UI components (30 tests)
+> - `npm run test:phase7`: Security, route validation, and audit (17 tests)
+> - `npm run test:validation`: Market sanity validation & anomaly rejection (13 tests)
+> 
+> The project builds cleanly with 0 TypeScript errors and 0 ESLint warnings. Thank you for your time and consideration!"*
+
+**On-Screen Action**: 
+- Run `npm run test:validation` or `npm run test:phase7` in the terminal to show all green checks passing.
+- Conclude the recording on the clean GitHub repository or live Vercel dashboard.
+
