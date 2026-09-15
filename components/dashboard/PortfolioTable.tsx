@@ -86,9 +86,22 @@ export function PortfolioTable({
         </div>
       </div>
 
-      {/* Main Table Structure */}
+      {/* Main Table Structure with Unified Alignment */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs border-collapse">
+          <colgroup>
+            <col className="w-[18%] min-w-[140px]" />
+            <col className="w-[8%] min-w-[80px]" />
+            <col className="w-[5%] min-w-[50px]" />
+            <col className="w-[9%] min-w-[90px]" />
+            <col className="w-[6%] min-w-[60px]" />
+            <col className="w-[6%] min-w-[55px]" />
+            <col className="w-[8%] min-w-[80px]" />
+            <col className="w-[9%] min-w-[90px]" />
+            <col className="w-[11%] min-w-[105px]" />
+            <col className="w-[6%] min-w-[60px]" />
+            <col className="w-[6%] min-w-[60px]" />
+          </colgroup>
           <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase text-[10px] tracking-wider font-medium">
             <tr>
               <th scope="col" className="py-3 px-4 text-left">Stock</th>
@@ -110,27 +123,24 @@ export function PortfolioTable({
                 <TableRowSkeleton key={i} />
               ))}
             </tbody>
-          ) : null}
+          ) : (
+            sectorSummaries.map((sector) => {
+              const sectorHoldings = holdings.filter(
+                (h) => h.sector.trim().toLowerCase() === sector.sector.trim().toLowerCase()
+              );
+
+              return (
+                <SectorSection
+                  key={sector.sector}
+                  sector={sector}
+                  holdings={sectorHoldings}
+                  isExpanded={expandedSectors[sector.sector] ?? true}
+                  onToggle={() => toggleSector(sector.sector)}
+                />
+              );
+            })
+          )}
         </table>
-      </div>
-
-      {/* Sector Groups */}
-      <div>
-        {sectorSummaries.map((sector) => {
-          const sectorHoldings = holdings.filter(
-            (h) => h.sector.trim().toLowerCase() === sector.sector.trim().toLowerCase()
-          );
-
-          return (
-            <SectorSection
-              key={sector.sector}
-              sector={sector}
-              holdings={sectorHoldings}
-              isExpanded={expandedSectors[sector.sector] ?? true}
-              onToggle={() => toggleSector(sector.sector)}
-            />
-          );
-        })}
       </div>
     </div>
   );
